@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Gym AI – workout planner</title>
+  <meta name="description" content="Get a gym workout plan built around your current weight and goal weight.">
+  <link rel="icon" href="icon.svg" type="image/svg+xml">
+  <link rel="manifest" href="manifest.webmanifest">
+  <meta name="theme-color" content="#0f172a">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="top">
+    <h1><img src="icon.svg" alt="" width="28" height="28"> Gym AI</h1>
+    <p>Tell us where you are and where you want to be. Your AI coach builds the week.</p>
+  </header>
+
+  <main>
+    <form id="profile" class="card" novalidate>
+      <fieldset class="row">
+        <legend>Weight</legend>
+        <label>Current weight <input name="currentWeight" type="number" inputmode="decimal" step="0.1" required></label>
+        <label>Goal weight <input name="goalWeight" type="number" inputmode="decimal" step="0.1" required></label>
+        <label>Unit
+          <select name="unit"><option value="lb">lb</option><option value="kg">kg</option></select>
+        </label>
+      </fieldset>
+
+      <fieldset class="row">
+        <legend>About you</legend>
+        <label>Age <input name="age" type="number" inputmode="numeric" min="13" max="100" placeholder="optional"></label>
+        <label>Sex
+          <select name="sex"><option value="unspecified">Prefer not to say</option><option value="male">Male</option><option value="female">Female</option></select>
+        </label>
+        <label>Experience
+          <select name="experience"><option value="beginner">Beginner</option><option value="intermediate">Intermediate</option><option value="advanced">Advanced</option></select>
+        </label>
+      </fieldset>
+
+      <fieldset class="row">
+        <legend>Training</legend>
+        <label>Days per week
+          <select name="daysPerWeek"><option>2</option><option selected>3</option><option>4</option><option>5</option><option>6</option></select>
+        </label>
+        <label>Minutes per session
+          <select name="sessionMinutes"><option>30</option><option selected>45</option><option>60</option><option>75</option><option>90</option></select>
+        </label>
+        <label>Equipment
+          <select name="equipment"><option value="full_gym">Full gym</option><option value="dumbbells">Dumbbells only</option><option value="bodyweight">Bodyweight / home</option></select>
+        </label>
+      </fieldset>
+
+      <label class="full">Injuries or preferences
+        <textarea name="notes" rows="2" maxlength="500" placeholder="e.g. bad left knee, love deadlifts, hate running"></textarea>
+      </label>
+
+      <p id="errors" class="errors" role="alert" hidden></p>
+      <button type="submit">Build my plan</button>
+    </form>
+
+    <section id="result" aria-live="polite" hidden></section>
+  </main>
+
+  <footer>Plans are general guidance, not medical advice. Check with a doctor before starting a new program.</footer>
+  <script src="app.js" type="module"></script>
+</body>
+</html>

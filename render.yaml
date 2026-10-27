@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: gym-ai
+    runtime: node
+    plan: free
+    buildCommand: npm ci
+    startCommand: node server.mjs
+    healthCheckPath: /api/health
+    envVars:
+      - key: ANTHROPIC_API_KEY
+        sync: false
