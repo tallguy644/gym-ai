@@ -1,0 +1,44 @@
+name: Android app
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  apk:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+      - run: npm ci
+      - run: npm run build:android-web
+      - name: Build APK
+        working-directory: android
+        run: ./gradlew --no-daemon assembleDebug
+      - run: cp android/app/build/outputs/apk/debug/app-debug.apk gym-ai.apk
+      - uses: actions/upload-artifact@v4
+        with:
+          name: gym-ai-apk
+          path: gym-ai.apk
+      # Keep one download link up to date with the newest build.
+      - name: Publish to the "android-prototype" pre-release
+        if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          gh release delete android-prototype --cleanup-tag --yes || true
+          gh release create android-prototype gym-ai.apk --prerelease --target "$SHA" \
+            --title "Gym AI Android prototype" \
+            --notes "Newest prototype build from ${SHA::7}. On your Android phone, download gym-ai.apk, open it, and allow installs from your browser if asked."
