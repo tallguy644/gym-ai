@@ -45,3 +45,5 @@ footer { color: var(--muted); font-size: .85rem; padding-bottom: 32px; }
   body { background: #fff; color: #000; }
   .card { border: 1px solid #ccc; break-inside: avoid; }
 }
+.settings summary { font-weight: 600; cursor: pointer; }
+.settings label { margin: 8px 0; }

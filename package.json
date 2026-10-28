@@ -4,12 +4,18 @@
   "private": true,
   "description": "AI workout planner that builds a gym plan from your current weight and goal weight.",
   "type": "module",
-  "engines": { "node": ">=20" },
+  "engines": {
+    "node": ">=20"
+  },
   "scripts": {
     "start": "node --env-file-if-exists=.env server.mjs",
-    "test": "node --test"
+    "test": "node --test",
+    "build:android-web": "node android/build-web.mjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^1.3.0"
+  },
+  "devDependencies": {
+    "esbuild": "^0.25.10"
   }
 }

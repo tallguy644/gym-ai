@@ -2,7 +2,7 @@ import http from 'node:http';
 import { readFile } from 'node:fs/promises';
 import { extname, join, normalize } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { analyzeGoal, starterPlan, validateProfile } from './domain.mjs';
+import { planResponse } from './plan-service.mjs';
 import { createPlanGenerator } from './ai.mjs';
 
 const PUBLIC_DIR = join(fileURLToPath(new URL('.', import.meta.url)), 'public');
@@ -30,20 +30,8 @@ export function createServer({ generatePlan, log = console } = {}) {
       if (req.method === 'POST' && url.pathname === '/api/plan') {
         let body;
         try { body = await readJson(req); } catch { return send(res, 400, { errors: ['Invalid request.'] }); }
-        const result = validateProfile(body);
-        if (!result.ok) return send(res, 400, { errors: result.errors });
-
-        const analysis = analyzeGoal(result.profile);
-        if (generatePlan) {
-          try {
-            const plan = await generatePlan(result.profile);
-            return send(res, 200, { source: 'ai', analysis, plan });
-          } catch (err) {
-            log.error('AI plan failed, using starter plan:', err?.message ?? err);
-            return send(res, 200, { source: 'starter', notice: 'The AI coach is unavailable right now, so here is a starter plan.', analysis, plan: starterPlan(result.profile) });
-          }
-        }
-        return send(res, 200, { source: 'starter', notice: 'AI is not set up on this server yet, so here is a starter plan.', analysis, plan: starterPlan(result.profile) });
+        const { status, body: out } = await planResponse(body, { generatePlan, log });
+        return send(res, status, out);
       }
 
       if (req.method === 'GET' && url.pathname === '/api/health') return send(res, 200, { ok: true, ai: Boolean(generatePlan) });

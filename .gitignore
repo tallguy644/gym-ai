@@ -1,2 +1,6 @@
 node_modules/
 .env
+android/app/src/main/assets/www/
+android/.gradle/
+android/**/build/
+android/local.properties

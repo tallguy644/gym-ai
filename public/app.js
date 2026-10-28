@@ -6,6 +6,15 @@ const errorsEl = document.getElementById('errors');
 const button = form.querySelector('button');
 const STORE_KEY = 'gym-ai:last';
 
+// The Android app sets window.GymAI to build plans on the phone instead of
+// calling the server. The web page uses the server.
+const host = window.GymAI ?? {};
+async function serverPlan(body) {
+  const res = await fetch('/api/plan', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) });
+  return { status: res.status, body: await res.json() };
+}
+const requestPlan = host.requestPlan ?? serverPlan;
+
 const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
 function store(key, value) { try { localStorage.setItem(key, JSON.stringify(value)); } catch {} }
@@ -51,9 +60,9 @@ function render({ plan, analysis, source, notice }) {
       <h3>Food and recovery</h3><ul>${plan.nutrition.map((n) => `<li>${esc(n)}</li>`).join('')}</ul>
       <h3>Stay safe</h3><ul>${plan.safety.map((n) => `<li>${esc(n)}</li>`).join('')}</ul>
     </div>
-    <div class="actions"><button type="button" id="print">Print or save as PDF</button></div>`;
+    ${host.inApp ? '' : '<div class="actions"><button type="button" id="print">Print or save as PDF</button></div>'}`;
   result.hidden = false;
-  document.getElementById('print').addEventListener('click', () => window.print());
+  document.getElementById('print')?.addEventListener('click', () => window.print());
 }
 
 form.addEventListener('submit', async (event) => {
@@ -63,9 +72,8 @@ form.addEventListener('submit', async (event) => {
   button.disabled = true;
   button.textContent = 'Building your plan…';
   try {
-    const res = await fetch('/api/plan', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) });
-    const data = await res.json();
-    if (!res.ok) {
+    const { status, body: data } = await requestPlan(body);
+    if (status !== 200) {
       errorsEl.textContent = (data.errors || ['Something went wrong.']).join(' ');
       errorsEl.hidden = false;
       return;
@@ -74,7 +82,7 @@ form.addEventListener('submit', async (event) => {
     render(data);
     result.scrollIntoView({ behavior: 'smooth' });
   } catch {
-    errorsEl.textContent = 'Could not reach the server. Check your connection and try again.';
+    errorsEl.textContent = host.inApp ? 'Something went wrong building your plan. Try again.' : 'Could not reach the server. Check your connection and try again.';
     errorsEl.hidden = false;
   } finally {
     button.disabled = false;
