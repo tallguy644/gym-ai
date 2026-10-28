@@ -90,9 +90,11 @@ export function analyzeGoal({ currentWeight, goalWeight, unit }) {
 }
 
 const LIBRARY = {
+  // Full gym plans use machines and cables first: they are easier to learn and
+  // safer to push hard without a spotter.
   full_gym: {
-    squat: 'Barbell back squat', hinge: 'Romanian deadlift', push: 'Barbell bench press', pull: 'Lat pulldown',
-    ohp: 'Seated dumbbell shoulder press', row: 'Seated cable row', lunge: 'Walking lunge', core: 'Cable crunch',
+    squat: 'Leg press', hinge: 'Seated leg curl', push: 'Machine chest press', pull: 'Lat pulldown',
+    ohp: 'Machine shoulder press', row: 'Seated cable row', lunge: 'Leg extension', core: 'Cable crunch',
     cardio: 'Incline treadmill walk',
   },
   dumbbells: {
@@ -116,7 +118,7 @@ export function starterPlan(profile) {
   const ex = (key, extra = {}) => ({ name: lib[key], sets, reps, restSeconds: 90, notes: '', ...extra });
 
   const dayA = { focus: 'Full body A', exercises: [ex('squat'), ex('push'), ex('row'), ex('core', { reps: '30-45 sec' })] };
-  const dayB = { focus: 'Full body B', exercises: [ex('hinge'), ex('ohp'), ex('pull'), ex('lunge', { reps: '10 each leg' })] };
+  const dayB = { focus: 'Full body B', exercises: [ex('hinge'), ex('ohp'), ex('pull'), ex('lunge', profile.equipment === 'full_gym' ? { reps: '10-15' } : { reps: '10 each leg' })] };
   const cardioMinutes = analysis.goal === 'lose' ? 20 : analysis.goal === 'recomp' ? 10 : 0;
 
   const days = Array.from({ length: profile.daysPerWeek }, (_, i) => {
