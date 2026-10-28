@@ -1,3 +1,5 @@
+import { videoUrl } from './video.js';
+
 const form = document.getElementById('profile');
 const result = document.getElementById('result');
 const errorsEl = document.getElementById('errors');
@@ -15,6 +17,12 @@ function goalLine(a) {
   return `Goal: ${verb} ${Math.abs(a.change)} ${a.unit}. A healthy pace is about ${a.weeklyRate} ${a.unit} a week, so plan on roughly ${a.estimatedWeeks} weeks.`;
 }
 
+function watchLink(name) {
+  const url = videoUrl(name);
+  if (!url) return '';
+  return `<a class="watch" href="${esc(url)}" target="_blank" rel="noopener noreferrer" aria-label="Watch how to do ${esc(name)} (opens YouTube)">▶ Watch how</a>`;
+}
+
 function render({ plan, analysis, source, notice }) {
   const days = plan.weeklySchedule.map((d) => `
     <article class="card day">
@@ -23,7 +31,7 @@ function render({ plan, analysis, source, notice }) {
       <div class="table"><table>
         <thead><tr><th>Exercise</th><th>Sets</th><th>Reps</th><th>Rest</th></tr></thead>
         <tbody>${d.exercises.map((e) => `
-          <tr><td>${esc(e.name)}${e.notes ? `<small>${esc(e.notes)}</small>` : ''}</td><td>${esc(e.sets)}</td><td>${esc(e.reps)}</td><td>${esc(e.restSeconds)}s</td></tr>`).join('')}
+          <tr><td>${esc(e.name)}${e.notes ? `<small>${esc(e.notes)}</small>` : ''}${watchLink(e.name)}</td><td>${esc(e.sets)}</td><td>${esc(e.reps)}</td><td>${esc(e.restSeconds)}s</td></tr>`).join('')}
         </tbody>
       </table></div>
       <p class="muted"><strong>Cardio:</strong> ${esc(d.cardio)}</p>

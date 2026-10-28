@@ -36,10 +36,12 @@ table { width: 100%; border-collapse: collapse; }
 th, td { text-align: left; padding: 8px 6px; border-bottom: 1px solid var(--line); vertical-align: top; }
 th { font-size: .8rem; color: var(--muted); font-weight: 600; }
 td small { display: block; color: var(--muted); }
+.watch { display: inline-block; margin-top: 4px; font-size: .85rem; font-weight: 600; color: var(--accent); text-decoration: none; }
+.watch:hover, .watch:focus { text-decoration: underline; }
 .actions { margin-bottom: 24px; }
 footer { color: var(--muted); font-size: .85rem; padding-bottom: 32px; }
 @media print {
-  .top p, form, .actions, footer { display: none; }
+  .top p, form, .actions, footer, .watch { display: none; }
   body { background: #fff; color: #000; }
   .card { border: 1px solid #ccc; break-inside: avoid; }
 }
