@@ -2,67 +2,116 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>Gym AI – workout planner</title>
-  <meta name="description" content="Get a gym workout plan built around your current weight and goal weight.">
+  <meta name="description" content="Get a gym workout plan built around your current weight and goal weight, with an AI coach.">
   <link rel="icon" href="icon.svg" type="image/svg+xml">
   <link rel="manifest" href="manifest.webmanifest">
-  <meta name="theme-color" content="#0f172a">
+  <meta name="theme-color" content="#0a0f14">
+  <meta name="color-scheme" content="dark">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <header class="top">
-    <h1><img src="icon.svg" alt="" width="28" height="28"> Gym AI</h1>
-    <p>Tell us where you are and where you want to be. Your AI coach builds the week.</p>
-  </header>
+  <div class="app">
+    <!-- Workout -->
+    <section id="view-workout" class="view" aria-labelledby="greeting">
+      <header class="hello">
+        <h1 id="greeting">Good Morning</h1>
+        <button type="button" class="avatar" id="avatar" aria-label="Open profile">G</button>
+      </header>
 
-  <main>
-    <form id="profile" class="card" novalidate>
-      <fieldset class="row">
-        <legend>Weight</legend>
-        <label>Current weight <input name="currentWeight" type="number" inputmode="decimal" step="0.1" required></label>
-        <label>Goal weight <input name="goalWeight" type="number" inputmode="decimal" step="0.1" required></label>
-        <label>Unit
-          <select name="unit"><option value="lb">lb</option><option value="kg">kg</option></select>
+      <div class="card readiness" id="readiness"></div>
+      <div id="insight"></div>
+      <div id="plan-area"></div>
+    </section>
+
+    <!-- Coach -->
+    <section id="view-coach" class="view coach-view" aria-labelledby="coach-title" hidden>
+      <header class="hello">
+        <h1 id="coach-title">AI Coach</h1>
+        <button type="button" class="icon-btn" id="clear-chat" aria-label="Clear chat" title="Clear chat">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/></svg>
+        </button>
+      </header>
+      <div class="bot-face" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="4" y="7" width="16" height="12" rx="4"/><path d="M12 3v4M9 13h.01M15 13h.01"/></svg></div>
+      <div id="chat" class="chat" aria-live="polite"></div>
+      <form id="chat-form" class="chat-input">
+        <label class="sr-only" for="chat-text">Message your coach</label>
+        <input id="chat-text" name="text" autocomplete="off" maxlength="1000" placeholder="Ask your coach…">
+        <button type="submit" class="send" aria-label="Send">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12l16-8-6 16-2-7z"/></svg>
+        </button>
+      </form>
+    </section>
+
+    <!-- Analytics -->
+    <section id="view-analytics" class="view" aria-labelledby="analytics-title" hidden>
+      <header class="hello"><h1 id="analytics-title">Analytics</h1></header>
+      <div id="analytics"></div>
+    </section>
+
+    <!-- Profile -->
+    <section id="view-profile" class="view" aria-labelledby="profile-title" hidden>
+      <header class="hello"><h1 id="profile-title">Profile</h1></header>
+
+      <form id="profile" class="card" novalidate>
+        <label class="full">Your name <input name="name" autocomplete="given-name" maxlength="40" placeholder="optional"></label>
+
+        <fieldset class="row">
+          <legend>Weight</legend>
+          <label>Current weight <input name="currentWeight" type="number" inputmode="decimal" step="0.1" required></label>
+          <label>Goal weight <input name="goalWeight" type="number" inputmode="decimal" step="0.1" required></label>
+          <label>Unit
+            <select name="unit"><option value="lb">lb</option><option value="kg">kg</option></select>
+          </label>
+        </fieldset>
+
+        <fieldset class="row">
+          <legend>About you</legend>
+          <label>Age <input name="age" type="number" inputmode="numeric" min="13" max="100" placeholder="optional"></label>
+          <label>Sex
+            <select name="sex"><option value="unspecified">Prefer not to say</option><option value="male">Male</option><option value="female">Female</option></select>
+          </label>
+          <label>Experience
+            <select name="experience"><option value="beginner">Beginner</option><option value="intermediate">Intermediate</option><option value="advanced">Advanced</option></select>
+          </label>
+        </fieldset>
+
+        <fieldset class="row">
+          <legend>Training</legend>
+          <label>Days per week
+            <select name="daysPerWeek"><option>2</option><option selected>3</option><option>4</option><option>5</option><option>6</option></select>
+          </label>
+          <label>Minutes per session
+            <select name="sessionMinutes"><option>30</option><option selected>45</option><option>60</option><option>75</option><option>90</option></select>
+          </label>
+          <label>Equipment
+            <select name="equipment"><option value="full_gym">Full gym</option><option value="dumbbells">Dumbbells only</option><option value="bodyweight">Bodyweight / home</option></select>
+          </label>
+        </fieldset>
+
+        <label class="full">Injuries or preferences
+          <textarea name="notes" rows="2" maxlength="500" placeholder="e.g. bad left knee, love leg press, hate running"></textarea>
         </label>
-      </fieldset>
 
-      <fieldset class="row">
-        <legend>About you</legend>
-        <label>Age <input name="age" type="number" inputmode="numeric" min="13" max="100" placeholder="optional"></label>
-        <label>Sex
-          <select name="sex"><option value="unspecified">Prefer not to say</option><option value="male">Male</option><option value="female">Female</option></select>
-        </label>
-        <label>Experience
-          <select name="experience"><option value="beginner">Beginner</option><option value="intermediate">Intermediate</option><option value="advanced">Advanced</option></select>
-        </label>
-      </fieldset>
+        <p id="errors" class="errors" role="alert" hidden></p>
+        <button type="submit" class="btn">Build my plan</button>
+      </form>
 
-      <fieldset class="row">
-        <legend>Training</legend>
-        <label>Days per week
-          <select name="daysPerWeek"><option>2</option><option selected>3</option><option>4</option><option>5</option><option>6</option></select>
-        </label>
-        <label>Minutes per session
-          <select name="sessionMinutes"><option>30</option><option selected>45</option><option>60</option><option>75</option><option>90</option></select>
-        </label>
-        <label>Equipment
-          <select name="equipment"><option value="full_gym">Full gym</option><option value="dumbbells">Dumbbells only</option><option value="bodyweight">Bodyweight / home</option></select>
-        </label>
-      </fieldset>
+      <div id="ai-settings"></div>
+      <p class="fine">Plans are general guidance, not medical advice. Check with a doctor before starting a new program.</p>
+      <p class="fine" id="build-info"></p>
+    </section>
+  </div>
 
-      <label class="full">Injuries or preferences
-        <textarea name="notes" rows="2" maxlength="500" placeholder="e.g. bad left knee, love deadlifts, hate running"></textarea>
-      </label>
+  <nav class="tabs" aria-label="Main">
+    <a href="#workout" data-tab="workout"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 9v6M6 6v12M18 6v12M21 9v6M6 12h12"/></svg>Workout</a>
+    <a href="#coach" data-tab="coach"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="7" width="16" height="12" rx="4"/><path d="M12 3v4M9 13h.01M15 13h.01"/></svg>Coach</a>
+    <a href="#analytics" data-tab="analytics"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 20V12M10 20V6M15 20v-9M20 20V4"/></svg>Analytics</a>
+    <a href="#profile" data-tab="profile"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c1-4 4-6 8-6s7 2 8 6"/></svg>Profile</a>
+  </nav>
 
-      <p id="errors" class="errors" role="alert" hidden></p>
-      <button type="submit">Build my plan</button>
-    </form>
-
-    <section id="result" aria-live="polite" hidden></section>
-  </main>
-
-  <footer>Plans are general guidance, not medical advice. Check with a doctor before starting a new program.</footer>
+  <dialog id="sheet" class="sheet"></dialog>
   <script src="app.js" type="module"></script>
 </body>
 </html>

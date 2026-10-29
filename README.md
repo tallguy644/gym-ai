@@ -8,6 +8,15 @@ You enter your weights, experience, how many days you can train, session length,
 2. Asks Claude (`claude-opus-5-5` by default) for a plan in a fixed JSON shape (structured outputs), so every plan has days, exercises, sets, reps, rest, cardio, progression, nutrition and safety notes.
 3. Shows the plan, keeps the last one in your browser, and lets you print or save it as a PDF.
 
+The app has four tabs, styled as a dark mobile app:
+
+- **Workout**: greeting, a daily readiness score from a quick check-in (sleep, energy, soreness, stress, each rated 1-5), an insight for today, and today's workout. Each exercise has **Swap Exercise**, **Adjust Sets** and **Watch how**. **Regenerate Plan** builds a fresh plan, and **Mark workout done** logs the session.
+- **Coach**: chat with the AI coach about form, food and recovery. It knows your goal, today's workout and readiness. Without an API key it gives short built-in answers.
+- **Analytics**: a goal progress ring with weeks to go, weight trend against your goal, a month calendar of workouts with your weekly streak, and readiness for the last 7 days.
+- **Profile**: your name, weights and training details (and the API key on Android).
+
+With **Full gym** selected, plans and swaps use machines and cables first, and free weights only where there's no good machine option. The readiness score comes from the check-in, not from a wearable, and all history is stored only in your browser or phone.
+
 If no API key is set, or the AI call fails, you still get a rule-based starter plan.
 
 ## Run it
@@ -33,10 +42,10 @@ Refused requests are retried on another model automatically (server-side fallbac
 `android/` is an installable Android app. It bundles the same page and plan logic, so it works without the server:
 
 - With no API key it builds starter plans on the phone, offline.
-- Paste a Claude API key under **AI coach settings** to get AI plans. The key is stored only on the phone, and the app calls the Claude API directly.
+- Paste a Claude API key under **AI coach settings** on the Profile tab to get AI plans and coach answers. The key is stored only on the phone, and the app calls the Claude API directly.
 - "Watch how" links open in YouTube.
 
-**Install:** every build is published to the [`android-prototype` pre-release](../../releases/tag/android-prototype). On your phone, download `gym-ai.apk`, open it, and allow installs from your browser if asked. New builds install over the old one.
+**Install:** every build is published to the [`android-prototype` pre-release](../../releases/tag/android-prototype). Each build gets a test number (`gym-ai-test-N.apk`, also shown at the bottom of the Profile tab). On your phone, download the newest `gym-ai-test-N.apk`, open it, and allow installs from your browser if asked. New builds install over the old one.
 
 **Build it yourself** (needs Node 20+, JDK 17 and the Android SDK):
 
@@ -60,10 +69,11 @@ Tests use a fake Claude client, so they don't need a key or network.
 | --- | --- |
 | `domain.mjs` | Input checks, goal math, and the starter plan. |
 | `ai.mjs` | Prompt, plan JSON schema, and the Claude call. |
-| `server.mjs` | Small Node HTTP server: `POST /api/plan`, `GET /api/health`, static files. |
+| `coach.mjs` | AI coach chat (Claude) with built-in answers when there is no key. |
+| `server.mjs` | Small Node HTTP server: `POST /api/plan`, `POST /api/coach`, `GET /api/health`, static files. |
 | `plan-service.mjs` | Turns a form into a plan response; shared by the server and the Android app. |
 | `android/` | Android app: a WebView around the bundled page (`android/web/` adds on-phone plan building). |
-| `public/` | The page (plain HTML, CSS and JS; works on phones and can be added to the home screen). |
+| `public/` | The page (plain HTML, CSS and JS; works on phones and can be added to the home screen). `readiness.js` scores check-ins, `swaps.js` picks exercise swaps, `progress.js` works out goal progress, streaks and the calendar. |
 
 ## Deploy
 

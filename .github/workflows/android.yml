@@ -23,22 +23,26 @@ jobs:
           java-version: 17
       - run: npm ci
       - run: npm run build:android-web
+        env:
+          GYM_AI_TEST: ${{ github.run_number }}
+      # Every build gets the next test number, so builds are easy to tell apart.
       - name: Build APK
         working-directory: android
-        run: ./gradlew --no-daemon assembleDebug
-      - run: cp android/app/build/outputs/apk/debug/app-debug.apk gym-ai.apk
+        run: ./gradlew --no-daemon assembleDebug -PtestNumber=${{ github.run_number }}
+      - run: cp android/app/build/outputs/apk/debug/app-debug.apk gym-ai-test-${{ github.run_number }}.apk
       - uses: actions/upload-artifact@v4
         with:
-          name: gym-ai-apk
-          path: gym-ai.apk
+          name: gym-ai-test-${{ github.run_number }}
+          path: gym-ai-test-${{ github.run_number }}.apk
       # Keep one download link up to date with the newest build.
       - name: Publish to the "android-prototype" pre-release
         if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
         env:
           GH_TOKEN: ${{ github.token }}
           SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+          TEST: ${{ github.run_number }}
         run: |
           gh release delete android-prototype --cleanup-tag --yes || true
-          gh release create android-prototype gym-ai.apk --prerelease --target "$SHA" \
-            --title "Gym AI Android prototype" \
-            --notes "Newest prototype build from ${SHA::7}. On your Android phone, download gym-ai.apk, open it, and allow installs from your browser if asked."
+          gh release create android-prototype "gym-ai-test-$TEST.apk" --prerelease --target "$SHA" \
+            --title "Gym AI Android prototype, test $TEST" \
+            --notes "Test $TEST, built from ${SHA::7}. On your Android phone, download gym-ai-test-$TEST.apk, open it, and allow installs from your browser if asked."
