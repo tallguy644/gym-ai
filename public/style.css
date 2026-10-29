@@ -158,6 +158,19 @@ input, select, textarea { font: inherit; color: var(--text); background: #0b1218
 .week-bars i { width: 100%; border-radius: 6px 6px 3px 3px; background: var(--grad); min-height: 3px; }
 .week-bars i.none { background: rgba(255, 255, 255, .06); }
 .card h2 { font-size: 1rem; }
+.goal-card { text-align: center; }
+.goal-card .ring-wrap { margin: 0 0 10px; }
+.goal-card .ring-label span { font-weight: 500; font-size: .78rem; }
+.ok { color: var(--green); }
+.cal-head { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+.streak { color: var(--green); font-weight: 700; font-size: .85rem; white-space: nowrap; }
+.cal { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; margin-top: 12px; }
+.cal small { text-align: center; color: var(--muted); font-size: .7rem; }
+.cal i { aspect-ratio: 1; border-radius: 7px; background: rgba(255, 255, 255, .05); font-style: normal; font-size: .7rem; color: var(--muted); display: grid; place-items: center; }
+.cal i.pad { background: none; }
+.cal i.future { opacity: .45; }
+.cal i.done { background: var(--grad); color: #04161a; font-weight: 700; }
+.cal i.today { outline: 2px solid var(--teal); outline-offset: -2px; }
 
 /* Bottom sheet (check-in, swap) */
 .sheet { border: 1px solid var(--line); border-radius: 22px 22px 0 0; background: var(--card); color: var(--text); width: 100%; max-width: 480px; margin: auto auto 0; padding: 20px 16px calc(20px + env(safe-area-inset-bottom)); max-height: 85vh; }

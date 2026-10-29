@@ -12,7 +12,7 @@ The app has four tabs, styled as a dark mobile app:
 
 - **Workout**: greeting, a daily readiness score from a quick check-in (sleep, energy, soreness, stress, each rated 1-5), an insight for today, and today's workout. Each exercise has **Swap Exercise**, **Adjust Sets** and **Watch how**. **Regenerate Plan** builds a fresh plan, and **Mark workout done** logs the session.
 - **Coach**: chat with the AI coach about form, food and recovery. It knows your goal, today's workout and readiness. Without an API key it gives short built-in answers.
-- **Analytics**: weight trend against your goal, readiness for the last 7 days, and workouts logged.
+- **Analytics**: a goal progress ring with weeks to go, weight trend against your goal, a month calendar of workouts with your weekly streak, and readiness for the last 7 days.
 - **Profile**: your name, weights and training details (and the API key on Android).
 
 With **Full gym** selected, plans and swaps use machines and cables first, and free weights only where there's no good machine option. The readiness score comes from the check-in, not from a wearable, and all history is stored only in your browser or phone.
@@ -73,7 +73,7 @@ Tests use a fake Claude client, so they don't need a key or network.
 | `server.mjs` | Small Node HTTP server: `POST /api/plan`, `POST /api/coach`, `GET /api/health`, static files. |
 | `plan-service.mjs` | Turns a form into a plan response; shared by the server and the Android app. |
 | `android/` | Android app: a WebView around the bundled page (`android/web/` adds on-phone plan building). |
-| `public/` | The page (plain HTML, CSS and JS; works on phones and can be added to the home screen). `readiness.js` scores check-ins, `swaps.js` picks exercise swaps. |
+| `public/` | The page (plain HTML, CSS and JS; works on phones and can be added to the home screen). `readiness.js` scores check-ins, `swaps.js` picks exercise swaps, `progress.js` works out goal progress, streaks and the calendar. |
 
 ## Deploy
 

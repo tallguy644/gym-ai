@@ -1,6 +1,7 @@
 import { videoUrl } from './video.js';
 import { FACTORS, factorPercent, factorWord, readinessAdvice, readinessLabel, readinessScore } from './readiness.js';
 import { swapExercise, swapOptions } from './swaps.js';
+import { goalProgress, monthCalendar, weekStreak } from './progress.js';
 
 const $ = (id) => document.getElementById(id);
 const form = $('profile');
@@ -389,22 +390,50 @@ function weightChart(points, goal) {
     </svg>`;
 }
 
+function goalRing(pct, line) {
+  const r = 70;
+  const c = 2 * Math.PI * r;
+  return `
+    <div class="ring" role="img" aria-label="${pct}% of the way to your goal">
+      <svg viewBox="0 0 168 168" aria-hidden="true">
+        <defs><linearGradient id="goal-grad" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#1fb5dc"/><stop offset="1" stop-color="#3ddc84"/></linearGradient></defs>
+        <circle class="track" cx="84" cy="84" r="${r}" stroke-width="12"/>
+        <circle cx="84" cy="84" r="${r}" stroke-width="12" stroke="url(#goal-grad)" stroke-dasharray="${c}" stroke-dashoffset="${c * (1 - pct / 100)}"/>
+      </svg>
+      <div class="ring-label"><small>Goal progress</small><strong>${pct}%</strong><span class="muted">${esc(line)}</span></div>
+    </div>`;
+}
+
 function renderAnalytics() {
   const f = last?.form;
   const unit = f?.unit ?? 'lb';
   const goal = f ? Number(f.goalWeight) : NaN;
   const weights = load(KEYS.weights, []).slice(-30);
   const latest = weights.at(-1)?.weight;
-  const start = weights[0]?.weight;
+  const start = weights[0]?.weight ?? (f ? Number(f.currentWeight) : undefined);
   const toGo = Number.isFinite(goal) && latest != null ? Math.round(Math.abs(latest - goal) * 10) / 10 : null;
+  const progress = goalProgress(start, latest ?? start, goal);
+  const rate = last?.data?.analysis?.weeklyRate;
+  const weeksLeft = progress && rate > 0 ? Math.ceil(progress.remaining / rate) : null;
 
   const checkins = load(KEYS.checkins, []);
   const week = Array.from({ length: 7 }, (_, i) => { const date = daysAgo(6 - i); return { date, c: checkins.find((x) => x.date === date) }; });
+  const weekScores = week.filter((w) => w.c).map((w) => readinessScore(w.c));
+  const avgReadiness = weekScores.length ? Math.round(weekScores.reduce((a, b) => a + b, 0) / weekScores.length) : null;
   const sessions = load(KEYS.sessions, []);
+  const dates = sessions.map((s) => s.date);
   const weekCount = sessions.filter((s) => s.date >= daysAgo(6)).length;
   const target = Number(f?.daysPerWeek) || 3;
+  const streak = weekStreak(dates, today());
+  const month = new Date().toLocaleDateString(undefined, { month: 'long' });
+  const cells = monthCalendar(today(), dates);
 
   $('analytics').innerHTML = `
+    ${progress ? `
+    <div class="card goal-card">
+      <div class="ring-wrap">${goalRing(progress.pct, progress.total ? `${progress.done} of ${progress.total} ${unit}` : 'Holding steady')}</div>
+      <p>${progress.remaining <= 0 ? '<b class="ok">Goal reached!</b>' : `<b class="ok">${progress.remaining} ${unit} to go</b>${weeksLeft ? `<span class="muted"> · about ${weeksLeft} weeks at a safe pace</span>` : ''}`}</p>
+    </div>` : ''}
     <div class="card">
       <h2>Weight</h2>
       <div class="stat-row">
@@ -420,20 +449,24 @@ function renderAnalytics() {
       </form>
     </div>
     <div class="card">
+      <div class="cal-head"><h2>${esc(month)} workouts</h2>${streak ? `<span class="streak">🔥 ${streak}-week streak</span>` : ''}</div>
+      <div class="cal" role="img" aria-label="${dates.filter((d) => d.startsWith(today().slice(0, 7))).length} workouts this month">
+        ${['M', 'T', 'W', 'T', 'F', 'S', 'S'].map((d) => `<small>${d}</small>`).join('')}
+        ${cells.map((c) => (c ? `<i class="${c.done ? 'done' : ''}${c.date === today() ? ' today' : ''}${c.future ? ' future' : ''}">${c.day}</i>` : '<i class="pad"></i>')).join('')}
+      </div>
+      <div class="stat-row">
+        <div class="stat"><small>Last 7 days</small><b>${weekCount} / ${target}</b></div>
+        <div class="stat"><small>Avg readiness</small><b>${avgReadiness != null ? `${avgReadiness}%` : '--'}</b></div>
+        <div class="stat"><small>All time</small><b>${sessions.length}</b></div>
+      </div>
+      ${sessions.length ? '' : '<p class="muted">Tap “Mark workout done” on the Workout tab after each session.</p>'}
+    </div>
+    <div class="card">
       <h2>Readiness, last 7 days</h2>
       <div class="week-bars">${week.map(({ date, c }) => {
         const s = c ? readinessScore(c) : 0;
         return `<div>${c ? s : ''}<i class="${c ? '' : 'none'}" style="height:${c ? Math.max(6, s) : 6}%"></i>${shortDay(date)}</div>`;
       }).join('')}</div>
-    </div>
-    <div class="card">
-      <h2>Workouts</h2>
-      <div class="stat-row">
-        <div class="stat"><small>Last 7 days</small><b>${weekCount} / ${target}</b></div>
-        <div class="stat"><small>All time</small><b>${sessions.length}</b></div>
-        <div class="stat"><small>Last</small><b>${sessions.length ? esc(sessions.at(-1).date.slice(5)) : '--'}</b></div>
-      </div>
-      <p class="muted">${sessions.length ? `Last workout: ${esc(sessions.at(-1).focus)}.` : 'Tap “Mark workout done” on the Workout tab after each session.'}</p>
     </div>`;
 
   $('weight-form').addEventListener('submit', (e) => {
