@@ -45,7 +45,7 @@ Refused requests are retried on another model automatically (server-side fallbac
 - Paste a Claude API key under **AI coach settings** on the Profile tab to get AI plans and coach answers. The key is stored only on the phone, and the app calls the Claude API directly.
 - "Watch how" links open in YouTube.
 
-**Install:** every build is published to the [`android-prototype` pre-release](../../releases/tag/android-prototype). On your phone, download `gym-ai.apk`, open it, and allow installs from your browser if asked. New builds install over the old one.
+**Install:** every build is published to the [`android-prototype` pre-release](../../releases/tag/android-prototype). Each build gets a test number (`gym-ai-test-N.apk`, also shown at the bottom of the Profile tab). On your phone, download the newest `gym-ai-test-N.apk`, open it, and allow installs from your browser if asked. New builds install over the old one.
 
 **Build it yourself** (needs Node 20+, JDK 17 and the Android SDK):
 

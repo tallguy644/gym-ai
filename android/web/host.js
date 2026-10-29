@@ -26,7 +26,7 @@ async function requestCoach(input) {
   return coachResponse(input, { reply, noAiNotice: NO_KEY_COACH_NOTICE });
 }
 
-window.GymAI = { inApp: true, requestPlan, requestCoach };
+window.GymAI = { inApp: true, requestPlan, requestCoach, testNumber: process.env.GYM_AI_TEST };
 
 // Settings panel for the API key, shown on the Profile tab.
 function settingsPanel() {

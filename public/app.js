@@ -515,6 +515,7 @@ form.addEventListener('submit', async (event) => {
 });
 
 function fillProfile() {
+  if (host.testNumber) $('build-info').textContent = `Test ${host.testNumber}`;
   if (last?.form) for (const [k, v] of Object.entries(last.form)) if (form.elements[k]) form.elements[k].value = v;
   form.elements.name.value = load(KEYS.name, '');
 }
