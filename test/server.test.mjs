@@ -74,3 +74,17 @@ test('AI refusal becomes an error so the server can fall back', async () => {
   const fakeClient = { beta: { messages: { create: async () => ({ stop_reason: 'refusal', content: [] }) } } };
   await assert.rejects(createPlanGenerator({ client: fakeClient })(profile), /declined/);
 });
+
+test('coach endpoint answers with or without AI', async () => {
+  const ask = (base, body) => fetch(`${base}/api/coach`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) });
+  await withServer({}, async (base) => {
+    const data = await (await ask(base, { messages: [{ role: 'user', text: 'what to eat?' }] })).json();
+    assert.equal(data.source, 'offline');
+    assert.match(data.reply, /protein/);
+    assert.equal((await ask(base, { messages: [] })).status, 400);
+  });
+  await withServer({ coachReply: async () => 'AI says hi' }, async (base) => {
+    const data = await (await ask(base, { messages: [{ role: 'user', text: 'hey' }] })).json();
+    assert.equal(data.reply, 'AI says hi');
+  });
+});

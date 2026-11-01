@@ -17,6 +17,10 @@ await build({
   target: 'chrome100',
   minify: true,
   outfile: `${out}/app.js`,
-  define: { 'process.env.CLAUDE_MODEL': 'undefined' },
+  define: {
+    'process.env.CLAUDE_MODEL': 'undefined',
+    // Test build number shown in the app; CI sets GYM_AI_TEST.
+    'process.env.GYM_AI_TEST': JSON.stringify(process.env.GYM_AI_TEST || ''),
+  },
   logLevel: 'info',
 });

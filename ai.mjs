@@ -51,6 +51,7 @@ Rules:
 - Build exactly one entry in weeklySchedule per training day the person asked for.
 - Fit each session, warm-up included, into their session length.
 - Only use exercises their equipment allows.
+- With full gym access, build the plan mainly from machines and cables (leg press, chest press, lat pulldown, cable row, machine shoulder press, leg curl and similar). Use free weights only where no good machine option exists.
 - Weight loss: keep heavy compound lifting to protect muscle, and add moderate cardio. Weight gain: prioritise progressive overload and keep cardio light. Recomposition: balance both.
 - Respect any injuries or notes. If a note suggests a medical risk, say to check with a doctor in safety.
 - Use plain language. Keep notes and cues short.`;
