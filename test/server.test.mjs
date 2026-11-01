@@ -88,3 +88,44 @@ test('coach endpoint answers with or without AI', async () => {
     assert.equal(data.reply, 'AI says hi');
   });
 });
+
+test('lets the Android app call the API (CORS)', async () => {
+  await withServer({}, async (base) => {
+    const pre = await fetch(`${base}/api/plan`, { method: 'OPTIONS', headers: { origin: 'https://appassets.androidplatform.net', 'access-control-request-method': 'POST' } });
+    assert.equal(pre.status, 204);
+    assert.equal(pre.headers.get('access-control-allow-origin'), 'https://appassets.androidplatform.net');
+    assert.match(pre.headers.get('access-control-allow-headers'), /content-type/);
+    const res = await post(base, { currentWeight: 200, goalWeight: 180 });
+    assert.equal(res.headers.get('access-control-allow-origin'), 'https://appassets.androidplatform.net');
+  });
+});
+
+test('limits AI plans per caller per hour, then serves starter plans', async () => {
+  const aiPlan = { title: 'AI plan', summary: '', weeklySchedule: [], progression: '', nutrition: [], safety: [] };
+  await withServer({ generatePlan: async () => aiPlan, planLimit: 2 }, async (base) => {
+    const sources = [];
+    for (let i = 0; i < 3; i++) sources.push((await (await post(base, { currentWeight: 150, goalWeight: 165 })).json()).source);
+    assert.deepEqual(sources, ['ai', 'ai', 'starter']);
+  });
+});
+
+test('limits AI coach answers per caller per hour', async () => {
+  await withServer({ coachReply: async () => 'Keep your back flat.', coachLimit: 1 }, async (base) => {
+    const ask = async () => (await (await fetch(`${base}/api/coach`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ messages: [{ role: 'user', text: 'How do I row?' }] }) })).json());
+    assert.equal((await ask()).source, 'ai');
+    const second = await ask();
+    assert.equal(second.source, 'offline');
+    assert.match(second.notice, /this hour/);
+  });
+});
+
+test('rate limiter forgets requests older than the window', async () => {
+  const { createRateLimiter } = await import('../server.mjs');
+  let t = 0;
+  const allow = createRateLimiter({ limit: 1, windowMs: 1000, now: () => t });
+  assert.equal(allow('a'), true);
+  assert.equal(allow('a'), false);
+  assert.equal(allow('b'), true);
+  t = 1001;
+  assert.equal(allow('a'), true);
+});

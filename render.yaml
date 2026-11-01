@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: gym-ai
+    name: gym-ai-tallguy644
     runtime: node
     plan: free
     buildCommand: npm ci
@@ -9,3 +9,8 @@ services:
     envVars:
       - key: ANTHROPIC_API_KEY
         sync: false
+      # AI requests each phone may make per hour, so nobody can run up the bill.
+      - key: PLAN_LIMIT_PER_HOUR
+        value: "10"
+      - key: COACH_LIMIT_PER_HOUR
+        value: "60"
