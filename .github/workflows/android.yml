@@ -25,6 +25,8 @@ jobs:
       - run: npm run build:android-web
         env:
           GYM_AI_TEST: ${{ github.run_number }}
+          # Optional repository variable; the build falls back to the Render address in render.yaml.
+          GYM_AI_SERVER: ${{ vars.GYM_AI_SERVER_URL }}
       # Every build gets the next test number, so builds are easy to tell apart.
       - name: Build APK
         working-directory: android

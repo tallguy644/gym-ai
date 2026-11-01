@@ -34,15 +34,19 @@ npm start                 # http://localhost:3000
 | `ANTHROPIC_API_KEY` | none | Claude API key. Without it the app serves starter plans only. |
 | `CLAUDE_MODEL` | `claude-opus-5-5` | Model used for plans. |
 | `PORT` | `3000` | Port to listen on. |
+| `PLAN_LIMIT_PER_HOUR` | `10` | AI plans each caller (IP address) gets per hour; after that, starter plans. `0` = no limit. |
+| `COACH_LIMIT_PER_HOUR` | `60` | AI coach answers each caller gets per hour; after that, built-in answers. `0` = no limit. |
 
 Refused requests are retried on another model automatically (server-side fallbacks, `fallbacks: "default"`).
 
 ## Android app (prototype)
 
-`android/` is an installable Android app. It bundles the same page and plan logic, so it works without the server:
+`android/` is an installable Android app. It bundles the same page and plan logic.
 
-- With no API key it builds starter plans on the phone, offline.
-- Paste a Claude API key under **AI coach settings** on the Profile tab to get AI plans and coach answers. The key is stored only on the phone, and the app calls the Claude API directly.
+- **AI plans and coach answers come from the Gym AI server** (see Deploy), which keeps the Claude API key. Nobody types a key into the app.
+- The server address is built into the APK: the `GYM_AI_SERVER_URL` repository variable (Settings > Secrets and variables > Actions > Variables), or `https://gym-ai-tallguy644.onrender.com` if that isn't set. It can also be changed under **AI coach settings** on the Profile tab.
+- If the server can't be reached, the app builds a starter plan and gives built-in coach answers on the phone, offline.
+- Optional: paste your own Claude API key in **AI coach settings** to skip the server and call Claude directly.
 - "Watch how" links open in YouTube.
 
 **Install:** every build is published to the [`android-prototype` pre-release](../../releases/tag/android-prototype). Each build gets a test number (`gym-ai-test-N.apk`, also shown at the bottom of the Profile tab). On your phone, download the newest `gym-ai-test-N.apk`, open it, and allow installs from your browser if asked. New builds install over the old one.
@@ -77,6 +81,13 @@ Tests use a fake Claude client, so they don't need a key or network.
 
 ## Deploy
 
-`render.yaml` deploys it as a free Render web service. Set `ANTHROPIC_API_KEY` in the Render dashboard.
+`render.yaml` deploys it as a free Render web service named `gym-ai-tallguy644`:
+
+1. On [render.com](https://render.com), sign in with GitHub and choose **New > Blueprint**, then pick this repo.
+2. When asked, paste your Claude API key as `ANTHROPIC_API_KEY` (get one at [platform.claude.com](https://platform.claude.com/)).
+3. When it's live, open `https://<service>.onrender.com/api/health`. It should say `"ai":true`.
+4. If Render gave the service a different address, set it as the `GYM_AI_SERVER_URL` repository variable and rebuild the APK (or paste it in the app's AI coach settings).
+
+The server allows calls from the Android app (CORS for `https://appassets.androidplatform.net`) and limits AI requests per caller per hour so a shared key can't be run up. Setting a monthly spend limit in the Claude Console is a good extra guard. Free Render services sleep when idle, so the first request after a while can take up to a minute; the app pings the server when it opens to wake it.
 
 Plans are general fitness guidance, not medical advice.

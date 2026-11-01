@@ -21,6 +21,8 @@ await build({
     'process.env.CLAUDE_MODEL': 'undefined',
     // Test build number shown in the app; CI sets GYM_AI_TEST.
     'process.env.GYM_AI_TEST': JSON.stringify(process.env.GYM_AI_TEST || ''),
+    // Address of the server that holds the Claude key; CI sets GYM_AI_SERVER.
+    'process.env.GYM_AI_SERVER': JSON.stringify(process.env.GYM_AI_SERVER || 'https://gym-ai-tallguy644.onrender.com'),
   },
   logLevel: 'info',
 });
