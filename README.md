@@ -13,7 +13,7 @@ The app has four tabs, styled as a dark mobile app:
 - **Workout**: greeting, a daily readiness score from a quick check-in (sleep, energy, soreness, stress, each rated 1-5), an insight for today, and today's workout. Each exercise has **Swap Exercise**, **Adjust Sets** and **Watch how**. **Regenerate Plan** builds a fresh plan, and **Mark workout done** logs the session.
 - **Coach**: chat with the AI coach about form, food and recovery. It knows your goal, today's workout and readiness. Without an API key it gives short built-in answers.
 - **Analytics**: a goal progress ring with weeks to go, weight trend against your goal, a month calendar of workouts with your weekly streak, and readiness for the last 7 days.
-- **Profile**: your name, weights and training details (and the API key on Android).
+- **Profile**: your name, weights and training details (and the AI coach status on Android).
 
 With **Full gym** selected, plans and swaps use machines and cables first, and free weights only where there's no good machine option. The readiness score comes from the check-in, not from a wearable, and all history is stored only in your browser or phone.
 
@@ -43,10 +43,9 @@ Refused requests are retried on another model automatically (server-side fallbac
 
 `android/` is an installable Android app. It bundles the same page and plan logic.
 
-- **AI plans and coach answers come from the Gym AI server** (see Deploy), which keeps the Claude API key. Nobody types a key into the app.
-- The server address is built into the APK: the `GYM_AI_SERVER_URL` repository variable (Settings > Secrets and variables > Actions > Variables), or `https://gym-ai-tallguy644.onrender.com` if that isn't set. It can also be changed under **AI coach settings** on the Profile tab.
+- **AI plans and coach answers come from the Gym AI server** (see Deploy), which keeps the Claude API key. The app never asks for a key.
+- The server address is built into the APK: the `GYM_AI_SERVER_URL` repository variable (Settings > Secrets and variables > Actions > Variables), or `https://gym-ai-tallguy644.onrender.com` if that isn't set. **AI coach** on the Profile tab shows whether the server is reachable and has its key, and lets you change the address.
 - If the server can't be reached, the app builds a starter plan and gives built-in coach answers on the phone, offline.
-- Optional: paste your own Claude API key in **AI coach settings** to skip the server and call Claude directly.
 - "Watch how" links open in YouTube.
 
 **Install:** every build is published to the [`android-prototype` pre-release](../../releases/tag/android-prototype). Each build gets a test number (`gym-ai-test-N.apk`, also shown at the bottom of the Profile tab). On your phone, download the newest `gym-ai-test-N.apk`, open it, and allow installs from your browser if asked. New builds install over the old one.
