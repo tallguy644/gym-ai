@@ -8,6 +8,11 @@ on:
 permissions:
   contents: write
 
+# One build at a time, so publishing the release never races.
+concurrency:
+  group: android-apk
+  cancel-in-progress: false
+
 jobs:
   apk:
     runs-on: ubuntu-latest
@@ -44,6 +49,12 @@ jobs:
           SHA: ${{ github.event.pull_request.head.sha || github.sha }}
           TEST: ${{ github.run_number }}
         run: |
+          # Builds can finish out of order. Never replace a newer test with an older one.
+          current=$(gh release view android-prototype --json name -q .name 2>/dev/null | grep -o '[0-9]*$' || true)
+          if [ -n "$current" ] && [ "$current" -gt "$TEST" ]; then
+            echo "Test $current is already published, so test $TEST is not."
+            exit 0
+          fi
           gh release delete android-prototype --cleanup-tag --yes || true
           gh release create android-prototype "gym-ai-test-$TEST.apk" --prerelease --target "$SHA" \
             --title "Gym AI Android prototype, test $TEST" \
