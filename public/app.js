@@ -31,6 +31,13 @@ const today = (d = new Date()) => `${d.getFullYear()}-${String(d.getMonth() + 1)
 const daysAgo = (n) => { const d = new Date(); d.setDate(d.getDate() - n); return today(d); };
 const shortDay = (iso) => new Date(`${iso}T12:00:00`).toLocaleDateString(undefined, { weekday: 'narrow' });
 
+const FACTOR_ICONS = {
+  sleep: '<path d="M20 14.5A8 8 0 0 1 9.5 4 8 8 0 1 0 20 14.5z"/>',
+  energy: '<path d="M13 2L4 14h7l-1 8 9-12h-7z"/>',
+  soreness: '<path d="M12 21s-7-4.5-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 11c0 5.5-7 10-7 10z"/>',
+  stress: '<path d="M3 12h4l2-6 4 12 2-6h6"/>',
+};
+
 const icon = {
   plan: '<svg viewBox="0 0 24 24"><path d="M3 9v6M6 6v12M18 6v12M21 9v6M6 12h12"/></svg>',
   spark: '<svg viewBox="0 0 24 24"><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"/></svg>',
@@ -63,7 +70,8 @@ function greeting() {
   const h = new Date().getHours();
   const part = h < 12 ? 'Morning' : h < 17 ? 'Afternoon' : 'Evening';
   const name = load(KEYS.name, '');
-  $('greeting').textContent = name ? `Good ${part}, ${name} 👋` : `Good ${part} 👋`;
+  $('greeting').innerHTML = name ? `Good ${part}, <span class="grad-text">${esc(name)}</span> 👋` : `Good ${part} 👋`;
+  $('today-date').textContent = new Date().toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric' });
   $('avatar').textContent = (name || 'G').trim().charAt(0).toUpperCase();
 }
 
@@ -89,9 +97,10 @@ function renderReadiness() {
   const score = todays ? readinessScore(todays) : null;
 
   const tiles = FACTORS.map((f) => `
-    <div class="factor">
-      <b>${f.label}${todays ? ` (${factorPercent(f, todays[f.key])}%)` : ''}</b>
-      ${todays ? `<em>${esc(factorWord(f, todays[f.key]))}</em>` : '<em class="muted">No check-in</em>'}
+    <div class="factor f-${f.key}">
+      <span class="f-ico" aria-hidden="true"><svg viewBox="0 0 24 24">${FACTOR_ICONS[f.key]}</svg></span>
+      <b>${f.label}</b>
+      ${todays ? `<em>${esc(factorWord(f, todays[f.key]))} · ${factorPercent(f, todays[f.key])}%</em>` : '<em class="muted">No check-in</em>'}
       <div class="bars" aria-hidden="true">${week.map((c) => c
         ? `<i style="height:${Math.max(8, factorPercent(f, c[f.key]))}%"></i>`
         : '<i class="none"></i>').join('')}</div>
@@ -333,7 +342,7 @@ function renderChat() {
   const chat = load(KEYS.chat, []);
   const name = load(KEYS.name, '');
   const hello = { role: 'coach', text: `Hi${name ? ` ${name}` : ''}! I’m your AI coach. Ask me about form, your plan, recovery or food.` };
-  $('chat').innerHTML = [hello, ...chat].map(bubble).join('') + (sending ? '<div class="msg coach typing">Thinking…</div>' : '')
+  $('chat').innerHTML = [hello, ...chat].map(bubble).join('') + (sending ? '<div class="msg coach typing" aria-label="Coach is typing"><i></i><i></i><i></i></div>' : '')
     + (chat.length ? '' : `<div class="suggest">${SUGGESTIONS.map((s) => `<button type="button" class="chip" data-q="${esc(s)}">${esc(s)}</button>`).join('')}</div>`);
   $('chat').querySelectorAll('[data-q]').forEach((b) => b.addEventListener('click', () => send(b.dataset.q)));
   if (location.hash === '#coach') window.scrollTo({ top: document.body.scrollHeight });
