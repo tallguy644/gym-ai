@@ -36,6 +36,7 @@ jobs:
         with:
           name: gym-ai-test-${{ github.run_number }}
           path: gym-ai-test-${{ github.run_number }}.apk
+          retention-days: 5
       # Keep one download link up to date with the newest build.
       - name: Publish to the "android-prototype" pre-release
         if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
